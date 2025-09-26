@@ -9,11 +9,22 @@ def find_candidate_pred_tokens(
     input_ids: torch.Tensor,
     max_ngram_size: int = 3,
     num_pred_tokens: int = 10,
+    *,
+    debug: bool = False,
+    log=None,
 ) -> torch.Tensor:
     """Return PLD candidate tokens by matching trailing n-grams in the prompt."""
     input_length = input_ids.size(1)
 
+    if debug and log is not None:
+        log(
+            f"find_candidate_pred_tokens: input_len={input_length}, max_ngram_size={max_ngram_size}, "
+            f"num_pred_tokens={num_pred_tokens}"
+        )
+
     if max_ngram_size <= 0 or num_pred_tokens <= 0 or max_ngram_size > input_length:
+        if debug and log is not None:
+            log("find_candidate_pred_tokens: invalid parameters, returning empty")
         return torch.tensor([], dtype=torch.long, device=input_ids.device)
 
     for ngram_size in range(max_ngram_size, 0, -1):
@@ -27,8 +38,16 @@ def find_candidate_pred_tokens(
             start_idx = idx + ngram_size
             end_idx = start_idx + num_pred_tokens
             if end_idx <= input_length and start_idx < input_length - ngram_size:
-                return input_ids[0, start_idx:end_idx]
+                result = input_ids[0, start_idx:end_idx]
+                if debug and log is not None:
+                    log(
+                        f"find_candidate_pred_tokens: matched ngram_size={ngram_size}, start_idx={start_idx}, "
+                        f"return_len={result.numel()}"
+                    )
+                return result
 
+    if debug and log is not None:
+        log("find_candidate_pred_tokens: no matches, returning empty")
     return torch.tensor([], dtype=torch.long, device=input_ids.device)
 
 

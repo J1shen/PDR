@@ -13,7 +13,7 @@ from accelerate import Accelerator
 from accelerate.utils import broadcast as broadcast_tensor
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.pld_parallel import parallel_speculative_decoding_with_pld
+from src.pld_engine import parallel_speculative_decoding_with_pld
 
 
 def build_args(namespace: argparse.Namespace) -> SimpleNamespace:
@@ -64,6 +64,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--draft-model", type=str, default="meta-llama/Llama-3.2-1B-Instruct")
     parser.add_argument("--target-model", type=str, default="meta-llama/Llama-3.2-3B-Instruct")
+    parser.add_argument("--debug", action="store_true", help="Enable verbose logging for debugging")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -103,6 +104,7 @@ def main() -> None:
         vocab_size=tokenizer.vocab_size,
         seed=args.seed,
         num_acc_tokens=num_acc_tokens,
+        debug=args.debug,
     )
 
     accelerator.wait_for_everyone()

@@ -7,7 +7,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from abc import ABC, abstractmethod
 from accelerate import Accelerator
 from .kvcache import KVCacheModel
-from .pld_parallel import parallel_speculative_decoding_with_pld
+from .pld_engine import parallel_speculative_decoding_with_pld
 from .kvcache4RC import KVCacheModel as KVCache2Model
 from .util import seed_everything, norm_logits, sample, max_fn
 import time
